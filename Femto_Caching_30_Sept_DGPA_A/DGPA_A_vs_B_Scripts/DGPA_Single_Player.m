@@ -12,6 +12,8 @@ Notes:
 
 This function performs a search of the optimal action in a space of actions S, 
 based on the Discrete Generalised Pursuit Algorithm for Learning Automata.
+This is a general function and does not care what the action space actually
+represents. 
 
 ------------------------- INPUT PARAMETERS -------------------------
 
@@ -284,7 +286,7 @@ Init_Iterations = 100;
             end
         end
                 
-        % 6) Update the estimates of the reward probabilities
+        % 6) Update the estimates of the probabilities of being rewarded
        
         New_D(i,:) =  W ./ Z; 
 

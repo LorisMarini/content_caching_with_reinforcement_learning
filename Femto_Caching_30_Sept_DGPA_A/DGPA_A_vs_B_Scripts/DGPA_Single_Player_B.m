@@ -1,85 +1,111 @@
-function [ LA, I ] = DGPA_Single_Player_B( Actions_Space ,Optimal_Action ,Environment_Variance ,Resolution ,Initial_Iterations )
-% DGPA_Signle_Player 
-% This function performs a search of the optimal action in a space of actions S, 
-% based on the Discrete Generalised Pursuit Algorithm for Learning
-% Automata.
+function [ LA, I ] = DGPA_Single_Player_B( Actions_Space ,Optimal_Action ,Environment_Variance ,Resolution ,Init_Iterations )
 
-% THis is version B. With a Different Approach in the Probability updating
-% policy. Action vector a(t) defined as follows:
+%{
+-------------------------   AUTHORSHIP  -------------------------
 
-% FOR j ~= i
-% aj(t) = D, if dj(t) =< di(t) && Pj ~= 0
-% aj(t) = I, if dj(t) > di(t) 
-% aj(t) = N, if Pj == 0
+Developer: Loris Marini
+Affiliation: The University of Sydney
+Contact: mrnlrs.tor@gmail.com
+Notes:
 
-% FOR j = i
-% aj(t) = I, if di(t) == max(dj(t))
-% aj(t) = D, otherwise.
+-------------------------   DESCRIPTION   -------------------------
 
-% D = Decrement;
-% I = Increment;
-% N = Don't do anything.
+This function performs a search of the optimal action in a space of actions S, 
+based on the Discrete Generalised Pursuit Algorithm for Learning Automata. This is 
+version B so called Conditional Inaction which translates into the following 
+probability updating policy for the action vector a(t):
 
-% INPUTS
-% 'S' should be a vector of integers from 1 to length(S) so that the 5th element of S is action  number 5.
-% 'Optiomal_Action' = Expectation of the Gaussian Random Environment; 
-% 'Environment_Variance' =  Variance of the Envoronment (typical values are 0.5,1,2,3).
-% 'Initial_Iterations' should be a small number, generally comprised betwee 10 and 100.
-% 'N' = Resolution. Determines the width of the discrete increments and decrements of the probability vector P at each iteration. 
-% (Higher 'N' leads to longer convergence times but higher accuracy). 
+    FOR j ~= i
+    aj(t) = D, if dj(t) =< di(t) && Pj ~= 0
+    aj(t) = I, if dj(t) > di(t) 
+    aj(t) = N, if Pj == 0
 
-% OUTPUTS
-% The function returns the Learned Action 'LA' as well as the number of
-% Iterations 'I' performed to learn.
+    FOR j = i
+    aj(t) = I, if di(t) == max(dj(t))
+    aj(t) = D, otherwise.
 
-% Author: Loris Marini 
-% Version: 1.0.0 
-% Date: 03/09/2014
+    Where:
+    D = Decrement;
+    I = Increment;
+    N = Don't do anything.
 
-%% VARIABLES INITIALISATION
+------------------------- INPUT PARAMETERS -------------------------
 
-    S = Actions_Space;  % Space of Actions
-    r = length(S);    % Number of actions to search from
-    P = (1/r).*ones(1,r);  % Actions Probability Vector uniformally initialised
-    D = zeros(1,r);   % Reward Probability Estimates
-    W = zeros(1,r);   % Incidence of Rewards 
-    Z = zeros(1,r);   % Actions Selection Incidence
-    N = Resolution;   % Resolution Parameter
-    Delta = 1/(r.*N); % Resulution Step
-    N_Ini = Initial_Iterations; % Number of routines for initialisation of estimates D
-    Opt_Act = Optimal_Action;      % The REAL OPTIMAL ACTION
-    Env_Variance = Environment_Variance; 
+-- Actions_Space -- 
+   A 1D array of integers from 1 to length(S) so that the i-th element of S is action number i.
+
+-- Optimal_Action -- 
+   Expectation of the Gaussian Random Environment. That is the expected
+   value of what the environment considers optimal action.
+       
+-- Environment_Variance --
+   Variance of the Envoronment (typical values are 0.5,1,2,3). It
+   represents the noise in the system, how uncertain is the optimal action
+   at any given time. 
+
+-- Resolution --
+   Determines the width of the discrete increments and decrements of the 
+   probability vector P at each iteration. Is related to \Delta in
+   eq.(10) and eq.(14) of Marini, L., Li, J., & Li, Y. (n.d.). "Distributed 
+   Caching based on Decentralized Learning Automata, 1–6" via Delta = 1/(r.*N). 
+   Higher Resolution leads to longer convergence times but higher accuracy.
+    
+-- Init_Iterations --
+   Is the numebr of times (during initialization) that actions must be selected 
+   before temrinating the initialization. Should be comprised betwee 10 and 100.
+
+
+------------------------- OUTPUT PARAMETERS -------------------------
+
+-- LA -- 
+    The learned action from the set.
+     
+-- I --
+    The number of iterations that were needeed to learn.
+
+------------------------- EXAMPLE OF CALL -----------------------
+
+
+DGPA_Single_Player( Actions_Space ,Optimal_Action ,Environment_Variance ,Resolution ,Init_Iterations )
+
+% ----------------------------   CODE     --------------------------
+%}
+
+
+%% Variable Initialization
+
+    S = Actions_Space;                   % Space of Actions
+    r = length(S);                       % Number of actions to search from
+    P = (1/r).*ones(1,r);                % Actions Probability uniformally initialised
+    D = zeros(1,r);                      % Reward Probability Estimates
+    W = zeros(1,r);                      % Number of times actions are rewarded 
+    Z = zeros(1,r);                      % Number of times actions are selected 
+    N = Resolution;                      % Resolution Parameter
+    Delta = 1/(r.*N);                    % Resulution Step
+    N_Ini = Init_Iterations;             % Number of routines for initialisation of estimates D
+    Opt_Act = Optimal_Action;            % The real optimal action
+    Env_Variance = Environment_Variance; % the noise in the environment.  
+
 
     %% Realisation of the Normal Random Environment
+    
     % We first determine what is the optimal action for the environment now.
     % Current_Optimum = Determine_Optimal_Action(Opt_Act, r/10, S);
 
     
-     %% MLE Initialisation of the whole vector D
-
-    while  sum( Z < N_Ini ) ~= 0
-
-         Ai = randsrc(1,1,[S;P]);
-         Z(Ai) = Z(Ai) + 1;
-
-         Current_Optimum = Determine_Optimal_Action(Opt_Act, Env_Variance, S);
-
-         if (Environment(Ai,S,Current_Optimum))       
-             W(Ai) = W(Ai) + 1;
-         else
-             W(Ai) = W(Ai);
-         end
-    end
-
-     D = W./Z;
-
-    % [D,W,Z] = MRC_Initialisation( Z,W,S,P,Opt_Act,Env_Variance,N_Ini);
+    % N is simply an integer. Delta is the \Delta in eq.(10) and eq.(14) of
+    % the paper.
+    
+    %% Maximum Likelihood estimation (MLE) of the vector D
+    
+    [D,W,Z] = MRC_Initialisation( Z,W,S,P,Opt_Act,Env_Variance,N_Ini);
+    
 
     %% Variables allocation and Initialisation
 
     Pre_All = 1000;
 
-    % Variables Allocation
+    % Variables pre-allocation
     New_P = zeros(Pre_All, r);
     New_D = zeros(Pre_All, r);
     K = zeros(1,Pre_All);
@@ -101,6 +127,7 @@ function [ LA, I ] = DGPA_Single_Player_B( Actions_Space ,Optimal_Action ,Enviro
     K(1) = 0;
     Remaining_Sum(1) = 0;
     New_Delta(:) = Delta;
+   
 
     %% DGPA at work to learn the optimum action.
 
@@ -112,6 +139,8 @@ function [ LA, I ] = DGPA_Single_Player_B( Actions_Space ,Optimal_Action ,Enviro
      % 6) We update the estimates of the reward probabilities
      % 7) Error Check.
 
+     
+     
      i = 2;
 
     while ~sum ( New_P(i-1,:) > 0.999 )
@@ -124,6 +153,7 @@ function [ LA, I ] = DGPA_Single_Player_B( Actions_Space ,Optimal_Action ,Enviro
 
         % 2)
         Feedback = Environment(Ai, S, Current_Optimum);
+        
         if (Feedback)
             W(Ai) = W(Ai) + 1;
         else
@@ -133,37 +163,57 @@ function [ LA, I ] = DGPA_Single_Player_B( Actions_Space ,Optimal_Action ,Enviro
         % 3) Update the reward probability estimates
         New_D(i,:) =  W ./ Z; 
         
+        
+        
         % 4) Determine which action should be incremented and which decremented.
+        
         Direction_Vector = zeros(1,r);
-        % Vector element = 1  INCREMENT
-        % Vector Element = 0  DECREMENT
-        % Vector Element = Inf Don't do anything.
+        
+        % Vector element = 1     INCREMENT
+        % Vector Element = 0     DECREMENT
+        % Vector Element = Inf   DON'T DO ANYTHING
         
         Actions_Subset = New_P( i-1,:) ~= 0;
         
         for o = 1:1:r
+            
             if (o ~= Ai)
                 if ( New_D(i-1,o) <= New_D(i-1,Ai)  &&  New_P( i-1, o )~= 0) 
+                    
                     Direction_Vector(o) = 0;
-                elseif ( New_D(i-1,o) > New_D(i-1,Ai) &&  New_P( i-1, o )~= 0)                      % ( New_D(i-1,o) > New_D(i-1,Ai)  &&  New_P( i-1, o )~= 0)
+                    
+                elseif ( New_D(i-1,o) > New_D(i-1,Ai) &&  New_P( i-1, o )~= 0)   
+                    
                     Direction_Vector(o) = 1;
+                    
                 elseif ( New_P( i-1, o ) == 0)
                     
                     Direction_Vector(o) = Inf;
                 end      
             elseif (o == Ai)
+                
                 [Value, Position] = max(New_D(i-1,Actions_Subset));
+                
                 Number_of_Maxima = sum ( New_D(i-1,Actions_Subset) == Value );
+                
                  if Number_of_Maxima == 1    % Single Maximum
+                     
                     if (New_D(i-1,Ai) == Value)
+                        
                         Direction_Vector(o) = 1;
+                        
                     elseif (New_D(i-1,Ai) ~= Value)
+                        
                         Direction_Vector(o) = 0;
                     end
+                    
                  elseif Number_of_Maxima > 1  % Multiple Maxima
+                     
                      Maxima =  New_D(i-1,:) == Value;
                      Index = Maxima & Actions_Subset;
+                     
                      if sum ( New_D(i-1,Index) == New_D(i-1,Ai) ) > 1
+                         
                           Direction_Vector(o) = 1;
                      else
                           Direction_Vector(o) = 0;
@@ -175,9 +225,11 @@ function [ LA, I ] = DGPA_Single_Player_B( Actions_Space ,Optimal_Action ,Enviro
         K(i) = sum( Direction_Vector == 1 );
         N_Dec(i) = sum( Direction_Vector == 0 );
         Inactions(i) = sum(Direction_Vector == Inf);
+        
         if (K(i) + N_Dec(i) +  Inactions(i)) ~= r
             error('Inconsistency.');
         end
+        
         Who_To_Inc =  Direction_Vector == 1;
         Who_To_Dec =  Direction_Vector == 0;
         

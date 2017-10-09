@@ -10,6 +10,8 @@ Min_Weighted_Delay = Inf*ones(1,N);
 Remaining_Helpers = 1:1:H;
 P_Selection = (1/H)*ones(1,H);
 Total_Time = 0;
+
+
 % Randomly select a helper.
 Allocations_Left = size(N_Groups,1)*H;
 Counter = 1;
