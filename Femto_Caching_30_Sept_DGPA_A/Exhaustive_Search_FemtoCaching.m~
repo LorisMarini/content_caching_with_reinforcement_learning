@@ -9,25 +9,44 @@ Notes:
 
 -------------------------   DESCRIPTION   -------------------------
 
-This function applies the exhaustive search to a particular cell with 4
-users and 4 providers:
+This function applies the exhaustive search to a .
 
-Distances = [12, Inf, 26, 39; 27, 26, Inf, 38; Inf, 25, 30, 69; 19, Inf, 16, 64];
-Any attempt to make the network larger would result in insane processing
-times. 
+Bandwidth = 10^6 [Hz];
+File_Size = 10^6 [bytes];
+SNR = 2;
+d = distance [m];
+alpha = [km^-1];
+
+The formula applyed is simply:
+
+Normalized_Delay = (File_Size_bytes * 8) / (Bandwidth_Hz * log2 (1 + SNR * exp(-distance.*alpha) ));
 
 ------------------------- INPUT PARAMETERS -------------------------
 
--- None --
- 
+None
+
+-- Alpha --
+The free space absorption coefficient [km^-1]
+
 ------------------------- OUTPUT PARAMETERS -------------------------
 
--- Optimal_Allocation -- 
-The optimal solution to this caching problem.
+-- Normalized_Delays -- 
+A matix of the same size as Distances but whose numbers represent the
+latency in seconds to transfer the file.
 
 ------------------------- EXAMPLE OF CALL -----------------------
+
+A propagation Loss of 1 Km^-1 and three users in a cell with 4 providers:
+
+Alpha = 3;
+Distances = [200,300,411,5; 40,203,110,900; 55,20,190,300];
+[ Parameters ] = Network_Normalised_Delays(Distances, Alpha);
+
 %}
 
+
+%   This code runs only for this network set up:
+%   Distances = [12, Inf, 26, 39; 27, 26, Inf, 38; Inf, 25, 30, 69; 19, Inf, 16, 64];
 
 %% Network Topology:
 
