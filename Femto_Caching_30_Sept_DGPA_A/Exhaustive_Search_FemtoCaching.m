@@ -124,12 +124,12 @@ Min_Weighted_Delay = Inf*ones(1,N);
 
 % Loop through all possible caching configurations and:
 
-1. Extract the 'Available_Files' matrix containing the files that would be 
-cached by each helper in that setup 's'.
+% 1. Extract the 'Available_Files' matrix containing the files that would be 
+% cached by each helper in that setup 's'.
 
-2. Simulate the user selections based on the criteria of nearest conent available. 
-If the same file is available in two locations the choie will be for the file 
-that can be downloaded faster (minimum latency).
+% 2. Simulate the user selections based on the criteria of nearest conent available. 
+% If the same file is available in two locations the choie will be for the file 
+% that can be downloaded faster (minimum latency).
 
 
 
@@ -148,6 +148,7 @@ for s = 1:1:size(N_Sets,1)
     for n = 1:1:N
         
        % Apply user choices accoridng to the Nearest Content Available - NCA
+       
        [ User_Selections ] = User_NCA_Selection( n, S, Available_Files, Network_Delays);
         
         %----  Calculate User average delay ----
