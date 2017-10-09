@@ -140,7 +140,7 @@ for s = 1:1:size(N_Sets,1)
         % Extract the cach configuration for helper h in set s:
         Current_Group = N_Sets(s,h); 
         % keep track of the files cached by each helper and therefore
-        % available in the cell
+        % available in the cell:
         Available_Files(:,h) = N_Groups(Current_Group,:);    
     end
     
