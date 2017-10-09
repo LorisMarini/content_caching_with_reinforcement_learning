@@ -1,15 +1,52 @@
-% SYSTEM PERFORMANCE
-% We set out to calculate the average weighted delay among all the users
-% in the network, for different types of algorithms and different
-% popularity distributions. 
+
+%{
+------------------- COMPARE ALL CACHING STRATEGIES  -----------------------
+
+
+---------------------------   AUTHORSHIP  ---------------------------------
+
+Developer: Loris Marini
+Affiliation: The University of Sydney
+Contact: mrnlrs.tor@gmail.com
+Notes:
+
+---------------------------   DESCRIPTION   -------------------------------
+
+This scripts calculates the average weighted delay among all the users
+in the network, for different types of algorithms and different file-popularity 
+distributions. 
+
+----------------------------- DEPENDENCIES --------------------------------
+
+Performance_Learning (...)
+Performance_Random_Placement(... )
+Performance_Best_Random_Placement(...)
+Performance_Greedy_Placement(...)
+Performance_Uncached(...)
+    
+
+-------------------------------- OUTPUT  ----------------------------------
+
+% ----------------------------   CODE     --------------------------
+%}
+
+
 clear all;
 close all;
+
+
+% Define the three types of reward policies possible:
 
 Rewards = { 'Best_File_Based_Reward', 'Weighted_Delay_Based_Reward',...           
             'Average_Weighted_Delay_Based_Reward'};
 
-% LOAD THE NETWORK
-load('Network_Delays_1_of_10_with_H4_N100');     % We focus on the first configuration;
+        
+% Load the cell (Network)
+% The file to load should be in /Femto_Caching_30_Sept_DGPA_A/Network_Configuration/Configurations
+% We focus on the first configuration:
+load('Network_Delays_1_of_10_with_H4_N100');      
+
+
 H = size(Network_Delays, 2) - 1;                  % Number of Helpers in the cell;
 N = size(Network_Delays, 1);                      % Number of Users in the cell;
 
@@ -20,14 +57,14 @@ Gamma_ZipF = 0.1 : 0.1 : 1;                       % Different Popularity Distrib
 N_Gammas = size(Gamma_ZipF,2);
 
 Resolution = 1;                                   % DGPA Learning Resolution;
-Conv_Prob_Th = 0.999;                             % DGPA Convergence Threshold;
+Conv_Prob_Th = 0.999;                             % DGPA Convergence Probability Threshold;
 Ini_Number = 10;                                  % DGPA Initialisation Minimum Selection;
-Reward_Number = 2;                                % Reward Strategy of the DGPA
-Reward_Type = Rewards{Reward_Number};             
+Reward_Number = 2;                                
+Reward_Type = Rewards{Reward_Number};             % Reward Strategy of the DGPA (see Rewards)
 
 SST_Rnd = 1000;            % Number of points among which we average for the Random Case;
 SST_G = 100;               % Number of points among which we average for the Greedy Case;
-SST_L = 10;               % Number of points among which we average for the Learning Case;
+SST_L = 10;                % Number of points among which we average for the Learning Case;
 
 Results_Directory ='C:\Users\lmar1564\Documents\MATLAB\FemtoChaching\Performance\Plots';
 
@@ -38,7 +75,7 @@ Results_Directory ='C:\Users\lmar1564\Documents\MATLAB\FemtoChaching\Performance
 %}
 
 [ Failures, Avg_Net_AWD_DGPA, Avg_Iter_GAME_DGPA, Avg_Iter_INIT_DGPA, Iterations_DGPA_INIT, Iterations_DGPA_GAME ] = ...
-    Performance_Learning(Results_Directory, Reward_Type, Network_Delays, Gamma_ZipF, SST_L, M, H, N, S, Ini_Number, Resolution, Conv_Prob_Th );
+    Performance_Learning (Results_Directory, Reward_Type, Network_Delays, Gamma_ZipF, SST_L, M, H, N, S, Ini_Number, Resolution, Conv_Prob_Th );
 
 %{
 [ Net_AWD_Best_Random ] = Performance_Best_Random_Placement(Results_Directory, Network_Delays, Gamma_ZipF, 5*ones(1,10), M, H, N, S  );
