@@ -12,9 +12,14 @@ Notes:
 
 ---------------------------   DESCRIPTION   -------------------------------
 
-This script initializes and playes a game of learning automata using DGPA
-reinforcement learning for different parameters of the game. The result is
-a statistical analysis of the algorithm performance.
+This Function sets out to calculate the Average of the Average Weighted
+Delay of the users for a set of Gammas (Zip-f distribution parameter) and
+a statistical sample set that can be specified and be different for each
+value of Gamma, when (M*H) files are allocated in the Helpers by means of
+a DGPA Learning Algorithm. The script returns also the CDF of the
+Average Network Weighted Delay, and the Average INITIALISATION and GAME 
+complexity calculated in temrs of number of iterations.
+           
 
 ----------------------------- DEPENDENCIES --------------------------------
 

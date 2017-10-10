@@ -11,7 +11,13 @@ Notes:
 
 ---------------------------   DESCRIPTION   -------------------------------
 
-This script 
+This Function sets out to calculate the Average of the Average Weighted
+Delay of the users for a set of Gammas (Zip-f distribution parameter) and
+a statistical sample set that can be specified and be different for each
+value of Gamma. The idea is to compare the Learning Algorithm with the
+Best Random Placement over the same number of iterations. The Average 
+number of iterations needed to the DGPA GAME to converge can be passed as
+the 'SST_Vector_Best_Rnd' input of this function.
 
 ----------------------------- DEPENDENCIES --------------------------------
 
