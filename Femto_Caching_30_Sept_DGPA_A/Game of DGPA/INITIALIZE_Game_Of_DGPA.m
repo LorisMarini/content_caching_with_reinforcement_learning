@@ -87,12 +87,12 @@ while (Lesser_Selected < N_Ini || Zeros > 0)
        error('Initialisation Failed.');
     end
     
-    % INI Learners Select Files in Parallel (same time)
+    % Learners Select Files in Parallel (same time)
     
     [Available_Files, New_Learning] = Learners_Files_Selection( S, Learning );
     Learning = New_Learning;
     
-    % INI Feedbacks from the users:
+    % Feedbacks from the users:
     
     % Pre-allocate cumulative Rewards for all users
     % Pre-allocate cumulative Penalsties for all users

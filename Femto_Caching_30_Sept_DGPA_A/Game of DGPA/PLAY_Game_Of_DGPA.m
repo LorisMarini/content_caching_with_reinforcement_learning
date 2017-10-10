@@ -1,22 +1,57 @@
 
 function [ Conv_Actions, Game_Iterations, History_Delays, Convergence_Delays, New_Learning] = PLAY_Game_Of_DGPA( Network_Delays, Popularities, Learning, Reward_Type, Resolution, P_Threshold   )
  
-%% INPUT
+%{
+--------------------------   AUTHORSHIP  ---------------------------------
 
-% Learning: The Set of Learners as Initialised by the 'INITIALIZE_Game_Of_DGPA'.
-% Network Delays: 
-% Distances_Matrix: 
-% Resolution: Typically 1, is the resolution step of the DGPA.
-% P_Threshold: Level of probability we consider to be convergence.
+Developer: Loris Marini
+Affiliation: The University of Sydney
+Contact: mrnlrs.tor@gmail.com
+Notes:
 
-%% OUTPUT
-% Conv_Actions = The set of actions for each learner that the game has converged to.
-% Weighted_Delays = The final weighted delay for each user.
-% GAME_Delay_Performance = The history of weighted delays for each user during the GAME.
+---------------------------   DESCRIPTION   -------------------------------
 
-% Author: Loris Marini 
-% Version: 1.0.1 
-% Date: 09/09/2014
+This script initializes a game of learning automata using DGPA
+reinforcement learning.
+
+----------------------------- DEPENDENCIES --------------------------------
+
+Learners_Files_Selection(...)
+User_Weighted_Delay(...)
+User_NCA_Selection(...)
+Best_File_Based_Reward()
+Weighted_Delay_Based_Reward()
+                                           
+-------------------------------- INPUT  ----------------------------------
+                                                
+Network_Delays
+    
+Popularities
+    
+Learning
+    The Set of Learners as Initialised by the 'INITIALIZE_Game_Of_DGPA'.
+Reward_Type
+    (See ...)
+Resolution
+    Typically 1, is the resolution step of the DGPA.
+P_Threshold 
+    Level of probability we consider to convergence.
+ 
+
+-------------------------------- OUTPUT  ----------------------------------
+
+Conv_Actions
+    The set of actions for each learner that the game has converged to.
+
+Weighted_Delays
+    The final weighted delay for each user.
+
+GAME_Delay_Performance
+    The history of weighted delays for each user during the GAME.
+
+% -----------------------------   CODE   ---------------------------------
+%}
+
 
 NP = size(Network_Delays,2);          % Number of content providers (BS or Helpers) in the cell
 H = NP - 1;                           % Number of Helpers in the cell
@@ -25,9 +60,6 @@ M = size(Learning,1);                 % Caching capability of each Helper
 F = H*M;                              % Total number of files that can be cached.
 S = 1:1:F;                            % S: Space of Actions. F: How many files we can offload from the BS.
 Delta = 1/(F.*Resolution);            % Resulution Step
-
-Sources_Degree = sum(Network_Delays < Inf, 1); % Number of users connected to each provider (Helper or BS)
-Users_Degree = sum(Network_Delays < Inf, 2);   % Number of providers (Helper or BS) each user is connected to.
 
 Conv_Actions = zeros(M,H);            % The Matrix of actions to which learners converge during the game.
 GAME_Positive_Feedbacks = zeros(M,H); % ....
@@ -42,34 +74,56 @@ while ~Check_Game_Convergence( Learning, P_Threshold )
     
     tic;  % Iteration Timing
 
-    %% GAME Learners Select Files in Parallel (same time) 
+    % Learners Select Files in Parallel (same time) 
     
     [Available_Files, New_Learning] = Learners_Files_Selection( S, Learning );
     Learning = New_Learning;
    
-   %% GAME Cumulative Feedbacks from all the users
+    % Feedbacks from the users:
    
-    GAME_Rewards = zeros(M,H+1);   % Cumulative Rewards for all users
-    GAME_Penalties = zeros(M,H+1); % Cumulative Penalties for all users
+    % Pre-allocate cumulative Rewards for all users
+    % Pre-allocate cumulative Penalsties for all users
+    
+    GAME_Rewards = zeros(M,H+1);   
+    GAME_Penalties = zeros(M,H+1); 
     
     switch Reward_Type
+        
         case 'Best_File_Based_Reward'
+            
             for n = 1:1:N
+                % Let each user choose which content they prefer using the
+                % policy if nearest available (Nearest Content Available
+                % NCA)
                 User_Selections = User_NCA_Selection( n, S, Available_Files, Network_Delays);
-                Weighted_Delay = User_Weighted_Delay( User_Selections, Popularities );
-                Delay_Performance(GITER,n) = Weighted_Delay;
+                
+                % Calculate the weighted latency that the user would experience
+                Delay_Performance(GITER,n) = User_Weighted_Delay( User_Selections, Popularities );
+                
                 User_Delays = Network_Delays(n,:);
-                [ Current_Rewards, N_Rewards, Current_Penalties, N_Penalties ] = Best_File_Based_Reward( User_Delays, User_Selections, Popularities );
+                
+                % Let the user provide its own feedback
+                [ Current_Rewards, ~, Current_Penalties, ~ ] = Best_File_Based_Reward( User_Delays, User_Selections, Popularities );
+                
+                % Update Rewards and Penalties
                 GAME_Rewards = GAME_Rewards + Current_Rewards;
                 GAME_Penalties = GAME_Penalties + Current_Penalties;
             end
             
         case 'Weighted_Delay_Based_Reward'
+            
             for n = 1:1:N
+                % Let each user choose which content they prefer using the
+                % policy if nearest available (Nearest Content Available
+                % NCA)
                 User_Selections = User_NCA_Selection( n, S, Available_Files, Network_Delays);
-                Weighted_Delay = User_Weighted_Delay( User_Selections, Popularities );
-                Delay_Performance(GITER,n) = Weighted_Delay;
+                
+                % Calculate the weighted latency that the user would experience
+                Delay_Performance(GITER,n) = User_Weighted_Delay( User_Selections, Popularities );
+                
                 User_Delays = Network_Delays(n,:);
+                
+                
                 if (Weighted_Delay < Min_Weighted_Delay(n))
                     Min_Weighted_Delay(n) = Weighted_Delay;
                 end
@@ -78,8 +132,12 @@ while ~Check_Game_Convergence( Learning, P_Threshold )
                 elseif (GITER > 1)
                     Current_Minima = Min_Weighted_Delay(n);
                 end
-                [ Current_Rewards, N_Rewards, Current_Penalties, N_Penalties ]...
-                    = Weighted_Delay_Based_Reward( User_Delays, User_Selections, Weighted_Delay, Current_Minima , Popularities );  
+                
+                % Let the user provide its own feedback
+                [ Current_Rewards, ~, Current_Penalties, ~ ]...
+                    = Weighted_Delay_Based_Reward( User_Delays, User_Selections, Weighted_Delay, Current_Minima , Popularities );
+                
+                % Update Rewards and Penalties
                 GAME_Rewards = GAME_Rewards + Current_Rewards;
                 GAME_Penalties = GAME_Penalties + Current_Penalties;
             end
@@ -89,12 +147,19 @@ while ~Check_Game_Convergence( Learning, P_Threshold )
             Tot_Penalties = zeros(M,H+1,N);
             
             for n = 1:1:N
+                % Let each user choose which content they prefer using the
+                % policy if nearest available (Nearest Content Available
+                % NCA)
                 User_Selections(n,:,:,:) = User_NCA_Selection( n, S, Available_Files, Network_Delays);
+                
+                % Calculate the weighted latency that the user would experience
                 This_User_Selections = squeeze(User_Selections(n,:,:,:));
-                Weighted_Delay(n) = User_Weighted_Delay( This_User_Selections, Popularities );
-                Delay_Performance(GITER,n) = Weighted_Delay(n);
+                Delay_Performance(GITER,n) = User_Weighted_Delay( This_User_Selections, Popularities );
+                
+                % Let the user provide its own feedback
                 User_Delays = Network_Delays(n,:);
-                [ Current_Rewards, N_Rewards, Current_Penalties, N_Penalties ] = Best_File_Based_Reward( User_Delays, This_User_Selections, Popularities );
+                [ Current_Rewards, ~, Current_Penalties, ~ ] = Best_File_Based_Reward( User_Delays, This_User_Selections, Popularities );
+                
                 Tot_Rewards(:,:,n) = Current_Rewards;
                 Tot_Penalties(:,:,n) = Current_Penalties;
             end
@@ -114,11 +179,12 @@ while ~Check_Game_Convergence( Learning, P_Threshold )
                     GAME_Penalties(:,j) = GAME_Penalties(:,j) + sum( squeeze( Tot_Rewards(:,j,:) ),2) + sum( squeeze( Tot_Penalties(:,j,:) ),2);
                 end
             end 
+            
             History_Of_Average_Weighted_Delays(GITER,:) = Average_Weighted_Delay;
 
     end
 
-    %% GAME Learners Determine the Environment Feedback Democratically
+    % GAME Learners Determine the Environment Feedback Democratically
     % 'Env_Feedback(k,j)'= 1  -->  Larner(k,j) Rewarded.
     % 'Env_Feedback(k,j)'= 0  -->  Learner(k,j) Penalised.
         
@@ -136,13 +202,13 @@ while ~Check_Game_Convergence( Learning, P_Threshold )
         end
      end
      
-      %% GAME Probabilities Vectors Update.
+      % GAME Probabilities Vectors Update.
       
       [ Updated_Learning, Updated_Conv_Actions ] = New_P_Vectors_DGPA_A( Conv_Actions, Learning, Delta, P_Threshold);
       Learning = Updated_Learning;
       Conv_Actions = Updated_Conv_Actions;
       
-     %% Iteration Timing
+     % Iteration Timing
       Time = toc;
       Elapsed_Time = Elapsed_Time + Time;
       Average_Time = Elapsed_Time/GITER;
@@ -154,8 +220,24 @@ end
 Game_Iterations = GITER - 1;
 New_Learning = Learning; 
 
+% Output Variables:
+
+switch Reward_Type
+    case 'Best_File_Based_Reward'
+        History_Delays = Delay_Performance;
+        Convergence_Delays = Delay_Performance(end,:);
+        
+    case 'Weighted_Delay_Based_Reward'
+        History_Delays = Delay_Performance;
+        Convergence_Delays = Delay_Performance(end,:);
+        
+    case 'Average_Weighted_Delay_Based_Reward'
+        History_Delays = History_Of_Average_Weighted_Delays;
+        Convergence_Delays = History_Of_Average_Weighted_Delays(end,:);
+end
+
+% VISUAL OUTPUT (Uncomment if needed in debugging mode)
 %{
-% VISUAL OUTPUT
 disp('-------------------------------------------------------------------');
 disp('=================== Convergence COMPLETE. ======================');
 disp('-------------------------------------------------------------------');
@@ -184,21 +266,6 @@ disp('-------------------------------------------------------------------');
  end
 
 %}
-%% Variables Output:
 
-switch Reward_Type
-        case 'Best_File_Based_Reward'       
-            History_Delays = Delay_Performance;
-            Convergence_Delays = Delay_Performance(end,:);
-            
-        case 'Weighted_Delay_Based_Reward'
-            History_Delays = Delay_Performance;
-            Convergence_Delays = Delay_Performance(end,:);
-            
-        case 'Average_Weighted_Delay_Based_Reward'    
-            History_Delays = History_Of_Average_Weighted_Delays;
-            Convergence_Delays = History_Of_Average_Weighted_Delays(end,:);
-end
- 
 end
 
