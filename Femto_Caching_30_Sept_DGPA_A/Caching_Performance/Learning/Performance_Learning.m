@@ -48,8 +48,7 @@ Resolution
            See PLAY_Game_Of_DGPA
 Conv_Prob_Th
            See PLAY_Game_Of_DGPA
-           
-           
+            
 -------------------------------- OUTPUT  ----------------------------------
 
 Failures
@@ -154,6 +153,7 @@ end
 legend(['Gamma 0.1','Gamma 0.2','Gamma 0.3','Gamma 0.4','Gamma 0.5',...
         'Gamma 0.6','Gamma 0.7','Gamma 0.8','Gamma 0.9','Gamma 1']);
     
+cd(Results_Directory);
 saveas(Figure_Handle_1,Fig_File_Name_1);
 
 
@@ -166,6 +166,8 @@ title(Title_2);
 xlabel('Gamma');
 ylabel('Average NAWD');
 grid on;
+
+cd(Results_Directory);
 saveas(Figure_Handle_2,Fig_File_Name_2);
 
 % AVERAGE COMPLEXITY INITIALISATION
@@ -181,6 +183,8 @@ xlabel('Gamma');
 ylabel('Iterations');
 grid on;
 hold on;
+
+cd(Results_Directory);
 saveas(Figure_Handle_3,Fig_File_Name_3);
 
 end
