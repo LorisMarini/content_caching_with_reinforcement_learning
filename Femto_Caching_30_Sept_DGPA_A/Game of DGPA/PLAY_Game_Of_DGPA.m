@@ -2,11 +2,13 @@
 function [ Conv_Actions, Game_Iterations, History_Delays, Convergence_Delays, New_Learning] = PLAY_Game_Of_DGPA( Network_Delays, Popularities, Learning, Reward_Type, Resolution, P_Threshold   )
  
 %% INPUT
+
 % Learning: The Set of Learners as Initialised by the 'INITIALIZE_Game_Of_DGPA'.
 % Network Delays: 
 % Distances_Matrix: 
 % Resolution: Typically 1, is the resolution step of the DGPA.
 % P_Threshold: Level of probability we consider to be convergence.
+
 %% OUTPUT
 % Conv_Actions = The set of actions for each learner that the game has converged to.
 % Weighted_Delays = The final weighted delay for each user.

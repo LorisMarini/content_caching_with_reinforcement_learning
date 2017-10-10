@@ -1,6 +1,8 @@
 function [ User_Selections ] = User_NCA_Selection( User_Number, S, Available_Files, Network_Delays)
 
-%% USER's SELECTION (NCA)
+% Implements the User File selection according to the Nearest Content Available Policy
+
+
 % User_Selections(k,j,f) is a collection of matrixes (M x H+1)
 % containing information about the NCA choices that user n
 % takes given the set of files (actions) taken by the
@@ -18,40 +20,57 @@ User_Selections = zeros(NL,NP,F);
 
 for f = 1:1:F
     
-    Altern_From_Helpers = (Available_Files == f);    % Options for downloading file 'f':
+    % Options for downloading file 'f':
+    Altern_From_Helpers = (Available_Files == f);   
     Alternatives = Altern_From_Helpers;
-    Alternatives(:,NP) = true;                       % The BS has all files, always.
+    
+    % The BS has all files, always:
+    Alternatives(:,NP) = true;                       
     Delays = Inf.*ones(1,NP);
-    Delays(sum(Alternatives,1)~=0) = Network_Delays( n, sum(Alternatives,1)~=0 ); % Delays between the user n and the helpers that can provide file 'f'.
-    [Min_Delay, S_ID_Selected] = min(Delays);                                     % S_ID_Selected = Helper or BS slected to download file f;
-    L_ID_Selected = Alternatives(:,S_ID_Selected);                                % L_ID_Selected = Learner within 'S_ID_Selected' that can provide file f;
+    
+    % Delays between the user n and the helpers that can provide file 'f':
+    Delays(sum(Alternatives,1)~=0) = Network_Delays( n, sum(Alternatives,1)~=0 );
+    
+    % S_ID_Selected = Helper or BS slected to download file f:
+    [Min_Delay, S_ID_Selected] = min(Delays);               
+    
+    % L_ID_Selected = Learner within 'S_ID_Selected' that can provide file f:
+    L_ID_Selected = Alternatives(:,S_ID_Selected);
     
     % Calculate the selections for current user n on file f:
     
     for j = 1:1:NP       
-        Redundancy_Flag = 0;                                                      % This flag controls the penalties to redundanct actions.       
+        % This flag controls the penalties to redundanct actions:       
+        Redundancy_Flag = 0;                                              
         for k = 1:1:NL    
             if ( j == S_ID_Selected)
                 % The selected source can be a helper or the base
                 % station BS. We differentiate the two cases. 
                 if ( S_ID_Selected < NP)                                    % We've selected the content from a helper.
-                    if(sum(L_ID_Selected) > 1)                              % In helper j there is a redundancy.         
+                    if(sum(L_ID_Selected) > 1)                              % In helper j there is a redundancy.   
+                        
                         if (Alternatives(k,j) == 1 && ~Redundancy_Flag)
                             User_Selections(k,j,f) = Delays(S_ID_Selected); % Report the delay with the selected learner.
                             Redundancy_Flag = 1;                            % All other alternatives in this helper will be penalised (redundant).              
+                        
                         elseif (Alternatives(k,j) == 1 && Redundancy_Flag)
                             User_Selections(k,j,f) = 0;                     % Penalise redunant selections.               
+                        
                         elseif(Alternatives(k,j) == 0)
                             User_Selections(k,j,f) = Inf;                   % All other learners are set to Infinity.
-                        end         
-                    elseif(sum(L_ID_Selected) == 1)                         % In helper j there is NOT redundancy.             
+                        end
+                        
+                    elseif(sum(L_ID_Selected) == 1)                         % In helper j there is NOT redundancy.
+                        
                         if (Alternatives(k,j) == 1)
                             User_Selections(k,j,f) = Delays(S_ID_Selected);
+                        
                         elseif(Alternatives(k,j) == 0)
                             User_Selections(k,j,f) = Inf;
                         end
-                    end      
-                elseif( S_ID_Selected == NP)                                % We've selected the content from THE BASE STATION.           
+                    end
+                    
+                elseif( S_ID_Selected == NP)                                % We've selected the content from THE BASE STATION.
                     User_Selections(k,j,f) = Delays(S_ID_Selected);         % Report the delay with the selected learner.     
                 end
                 

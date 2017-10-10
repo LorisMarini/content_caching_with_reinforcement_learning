@@ -1,11 +1,11 @@
 function [ Rewards, N_Rewards, Penalties, N_Penalties ] = Weighted_Delay_Based_Reward( Curr_User_Delays, User_Selections, Weighted_Delay, Min_Weighted_Delay, Popularities )
 
-%% USER's FEEDBACK TO THE SOURCES
-% If the users' AVERAGE delay is lower than the storical minimum:
-% It rewards the learnes selected and penalises those discarded.
-% If the users' AVERAGE delay is higher than the storical minimum:
-% It penalises both the lerners selected and those discarded.
-% It is assumed here that the selection is done according to the NCA
+% CALCULATES USERS FEEDBACK TO THE HELPERS
+
+% If the users' AVERAGE delay is lower than the storical minimum it rewards the 
+% learnes selected and penalises those discarded. If the users' AVERAGE delay is 
+% higher than the storical minimum it penalises both the lerners selected and 
+% those discarded. It is assumed here that the selection is done according to the NCA
 % principle (User_Selections).
 
 

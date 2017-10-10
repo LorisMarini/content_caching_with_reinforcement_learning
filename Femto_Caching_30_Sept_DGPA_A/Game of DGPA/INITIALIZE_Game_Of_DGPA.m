@@ -27,7 +27,7 @@ Weighted_Delay_Based_Reward()
 -------------------------------- INPUT  ----------------------------------
                                                 
 Network_Delays 
-                                                             
+    Matrix of delays NxH+1 where N= number of users and H+1= Number of providers                                                         
 M 
     Caching capability of a single helper;
                                                              
@@ -58,8 +58,6 @@ S = 1:1:F;                                  % S: Space of Actions. F: How many f
 
 N_Ini = Initialization_Number;              % Initial #Iterations for estimation of D from each Learner
 INI_Positive_Feedbacks = zeros(M,H);        % Initialise Environmental Feedback
-
-Learning = Allocate_Learners( H,M,F );      % Learners' Variables Intialisation
 Zeros = Inf;                                % Is a variable to control the learners with empty D.
 ITER = 1;                                   % Iteration Number
 
@@ -67,11 +65,15 @@ Min_Weighted_Delay = Inf*ones(1,N);
 Min_Average_Weighted_Delay = Inf*ones(1,H);
 Average_Weighted_Delay = zeros(1,H);
 
+
 % Loop until you make sure that all actions are selected at least N_Ini
 % times. We do it with 'Lesser_Selected' which is a variable that controls 
 % the action that has been selected the least.
 
-Lesser_Selected = 0;                        
+Lesser_Selected = 0;   
+
+% Initialize learners
+Learning = Allocate_Learners( H,M,F );
 
 while (Lesser_Selected < N_Ini || Zeros > 0)
     

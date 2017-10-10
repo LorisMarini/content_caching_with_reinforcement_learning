@@ -1,5 +1,7 @@
 function [ Weighted_Delay ] = User_Weighted_Delay( User_Selections, Popularities )
 
+% Calculates the user weighted delay.
+
 Weighted_Delay = 0;   % Average delay for user 'n'.
 N_Files_Selected = 0; % Error Check.
 

@@ -1,14 +1,16 @@
+
 function [ Rewards, N_Rewards, Penalties, N_Penalties ] = Best_File_Based_Reward( Curr_User_Delays,User_Selections,Popularities )
 
-%% USER's FEEDBACK TO THE SOURCES
+% CALCULATES THE USER's FEEDBACK TO THE HELPERS
+
 % The User rewards the learnes selected and penalises those discarded.
 % It is assumed here that the selection is done according to the NCA
 % principle (User_Selections).
 
 
-NL = size(User_Selections,1); % Number of Learners
-NP = size(User_Selections,2); % Number of Providers (H+1)
-F = size(User_Selections,3);  % Number of Files
+NL = size(User_Selections,1);   % Number of Learners
+NP = size(User_Selections,2);   % Number of Providers (H+1)
+F = size(User_Selections,3);    % Number of Files
         
 Rewards = zeros(NL,NP);
 Penalties = zeros(NL,NP);
