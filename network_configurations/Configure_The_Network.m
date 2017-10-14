@@ -51,16 +51,28 @@ A struct containing all the relevant parameters for the function call.
 
 ------------------------- EXAMPLE OF CALL -----------------------
 
+% Number of radio cells to deploy
+Nrc = 2;
 
-2 Radio Cells
-1 Km in diamter
-10 meters of clear space around each user
-Step size of 0.1 
-20 Helpers in the network 
-100 users
-A propagation Loss of 1
+% Cell diameter [m]
+Diam = 1000;
 
-[ Parameters ] = Configure_The_Network( 2, 1000, 10, 0.1, 20, 100, 1)
+% Clear space around each helper [m]:
+CS = 10;
+
+% Step size
+SS = 0.1
+
+% Number of helpers in the network
+Nh = 20;
+
+% Number of users in the network
+Nu = 100;
+
+% A propagation Loss of 1 [km^-1]
+Ap = 1;
+
+[ Parameters ] = Configure_The_Network( Nrc, Diam, CS, SS, Nh, Nu, Ap)
 
 %}
 % ----------------------------   CODE     --------------------------
