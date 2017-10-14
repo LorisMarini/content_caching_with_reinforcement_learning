@@ -16,5 +16,29 @@ There are many ways to approach a sub-optimal solution to the caching problem. W
 
 # CODE
 
+First run the following command: addpath(genpath('your-path/content_caching_with_reinforcement_learning')); where you have to be careful to replace 'your-path' with the folder path in your computer. The purpose of this is to tell matlab to add all directories and sub-directories to the path and know where to look for function definitions.
+
+# 1. Network Deployment
+
+To get started with the 'Configure_The_Network' function simply copy the text under the line "- EXAMPLE OF CALL -" in the function description and run it in the command window:
+
+% Number of radio cells to deploy
+Nrc = 2;
+% Cell diameter [m]
+Diam = 1000;
+% Clear space around each helper [m]:
+CS = 10;
+% Step size
+SS = 0.1
+% Number of helpers in the network
+Nh = 20;
+% Number of users in the network
+Nu = 100;
+% A propagation Loss of 1 [km^-1]
+Ap = 1;
+
+[ Parameters ] = Configure_The_Network( Nrc, Diam, CS, SS, Nh, Nu, Ap)
+
+You should e able to execute it without problems as well as debug the code. 
 
 
