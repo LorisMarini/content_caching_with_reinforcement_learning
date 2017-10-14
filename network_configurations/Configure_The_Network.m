@@ -65,6 +65,13 @@ A propagation Loss of 1
 %}
 % ----------------------------   CODE     --------------------------
 
+% Add the communications toolbox to path. This is a known issue in Matlab
+% 2017a. See this post for more info: 
+
+% https://au.mathworks.com/matlabcentral/answers/350491-how-to-set-the-correct-path-
+% for-communications-toolbox-for-rtl-sdr-support-package-at-startup
+        
+addpath(fullfile(matlabroot, 'toolbox', 'comm', 'comm'), '-end')
 
 % Define the path to the directory where you store the network configurations:
 % path_to_networks = 'C:\Users\lmar1564\Documents\MATLAB\FemtoChaching\Network_Configuration\Configurations';
